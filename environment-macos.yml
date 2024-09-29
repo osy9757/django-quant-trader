@@ -1,0 +1,2 @@
+dependencies:
+  - libomp  # 예시: macOS에서 필요할 수 있는 패키지

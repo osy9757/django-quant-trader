@@ -1,0 +1,23 @@
+name: django-quant-trader
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - django=4.1
+  - celery=4.4.0
+  - sqlalchemy
+  - simplejson
+  - requests
+  - cryptography
+  - pytz
+  - urllib3
+  - pip
+  - pip:
+    - amqp==2.6.1
+    - asgiref
+    - billiard
+    - brotli
+    - kombu==4.6.3
+    - sqlparse
+    - typing-extensions
