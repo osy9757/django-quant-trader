@@ -5,19 +5,20 @@ channels:
 dependencies:
   - python=3.11
   - django=4.1
-  - celery=4.4.0
-  - sqlalchemy
-  - simplejson
-  - requests
-  - cryptography
-  - pytz
-  - urllib3
   - pip
   - pip:
-    - amqp==2.6.1
+    - celery==5.2.7
+    - billiard==3.6.4.0
+    - kombu==5.2.4
+    - amqp==5.1.1
+    - sqlalchemy
+    - simplejson
+    - requests
+    - cryptography
+    - pytz
+    - urllib3
     - asgiref
-    - billiard
     - brotli
-    - kombu==4.6.3
     - sqlparse
     - typing-extensions
+    - redis  # 이 줄을 추가합니다
