@@ -4,7 +4,7 @@ class UpbitData(models.Model):
     period = models.IntegerField()
     recovered = models.BooleanField(default=False)
     market = models.CharField(max_length=10)
-    date_time = models.DateTimeField()
+    date_time = models.DateTimeField(db_index=True)
     opening_price = models.FloatField()
     high_price = models.FloatField()
     low_price = models.FloatField()

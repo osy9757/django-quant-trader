@@ -1,6 +1,7 @@
 import os
 from celery import Celery
 from celery.signals import worker_ready
+from django.conf import settings
 
 # Django 설정 모듈을 Celery의 기본으로 사용
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -20,6 +21,6 @@ def debug_task(self):
 def at_start(sender, **kwargs):
     with sender.app.connection() as conn:
         sender.app.send_task('data_provider.tasks.fetch_historical_upbit_data', 
-                             args=["2017-10-01", 200, 1],
+                             args=[settings.UPBIT_START_DATE, 200, 0.5],
                              connection=conn)
 

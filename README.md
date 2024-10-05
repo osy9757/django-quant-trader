@@ -158,3 +158,9 @@ django_backend/
 6. 매매 시스템 테스트
 7. 매매 시스템 운용
 8. KakoTalk Controller 구축
+
+## 수정 사항
+
+- db sqlite 3 -> postgresql 변경
+
+  이유 : 분봉데이터가 너무 커서 조회에 어려움이 있어서 파티셔닝을 적용해 저장하기 위해서

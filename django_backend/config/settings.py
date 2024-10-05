@@ -81,9 +81,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'quant',
+        'USER': 'osy',
+        'PASSWORD': 'quant',
+        'HOST': 'localhost',  # 또는 데이터베이스 서버의 IP 주소
+        'PORT': '5432',       # PostgreSQL의 기본 포트
     }
 }
 
@@ -112,11 +116,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -145,7 +149,7 @@ CELERY_BEAT_SCHEDULE = {
     'fetch-historical-upbit-data-daily': {
         'task': 'data_provider.tasks.fetch_historical_upbit_data',
         'schedule': crontab(hour=0, minute=0),  # 매일 자정에 실행
-        'args': ("2017-10-01", 200, 1),  # start_date, max_batch_size, api_call_interval
+        'args': ("2019-10-01", 200, 1),  # start_date, max_batch_size, api_call_interval
         'options': {'queue': 'data_fetch'}
     },
 }
@@ -180,3 +184,5 @@ LOGGING = {
         },
     },
 }
+
+UPBIT_START_DATE = "2023-10-05T00:00:00+09:00"
