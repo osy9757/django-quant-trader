@@ -149,7 +149,7 @@ CELERY_BEAT_SCHEDULE = {
     'fetch-historical-upbit-data-daily': {
         'task': 'data_provider.tasks.fetch_historical_upbit_data',
         'schedule': crontab(hour=0, minute=0),  # 매일 자정에 실행
-        'args': ("2019-10-01", 200, 1),  # start_date, max_batch_size, api_call_interval
+        'args': ("UPBIT_START_DATE", 200, 1),  # start_date, max_batch_size, api_call_interval
         'options': {'queue': 'data_fetch'}
     },
 }
@@ -185,4 +185,4 @@ LOGGING = {
     },
 }
 
-UPBIT_START_DATE = "2023-10-05T00:00:00+09:00"
+UPBIT_START_DATE = "2019-10-01T00:00:00+09:00"

@@ -36,8 +36,8 @@ django_backend/
 │   └── tasks.py                # Celery로 처리되는 중재 작업들
 │
 ├── controller/                 # Controller layer
-│   ├── telegram_controller/    # TelegramController
-│   │   ├── telegram_controller.py
+│   ├── kakao_controller/    # KakaoTalk Controller
+│   │   ├── kakao_controller.py
 │   │   └── __init__.py
 │   │
 │   ├── simulator/              # Simulator
