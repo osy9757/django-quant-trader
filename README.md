@@ -159,8 +159,18 @@ django_backend/
 7. 매매 시스템 운용
 8. KakoTalk Controller 구축
 
+9. AWS 배포
+10. Jenkins 연동 CI/CD
+
+11. 모니터링 시스템 구축
+
 ## 수정 사항
 
 - db sqlite 3 -> postgresql 변경
 
   이유 : 분봉데이터가 너무 커서 조회에 어려움이 있어서 파티셔닝을 적용해 저장하기 위해서
+
+## 추후 생각해봐야할 문제
+
+- 상태관리 (Redis 상에서 상태관리를 fetch_historical_upbit_data 에서만 하고 있는 부분 고려)
+- upbit 데이터 db에 동시에 삽입 혹은 수정할 경우 충돌 가능성 체크

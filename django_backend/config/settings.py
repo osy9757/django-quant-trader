@@ -146,9 +146,9 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 60.0,  # 1분마다 실행
         'options': {'queue': 'data_fetch'}
     },
-    'fetch-historical-upbit-data-daily': {
+    'fetch-historical-upbit-data-hourly': { 
         'task': 'data_provider.tasks.fetch_historical_upbit_data',
-        'schedule': crontab(hour=0, minute=0),  # 매일 자정에 실행
+        'schedule': crontab(minute=0),  # 매시간 정각에 실행
         'args': ("UPBIT_START_DATE", 200, 1),  # start_date, max_batch_size, api_call_interval
         'options': {'queue': 'data_fetch'}
     },
