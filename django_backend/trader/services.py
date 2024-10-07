@@ -81,7 +81,9 @@ class UpbitTrader(AbstractTrader):
             payload["query_hash_alg"] = "SHA512"
         
         return jwt.encode(payload, self.secret_key)
-
+    
+    def _request_get(self, url, headers = None, params = None):
+        pass
 
 
 
