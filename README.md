@@ -174,3 +174,7 @@ django_backend/
 
 - 상태관리 (Redis 상에서 상태관리를 fetch_historical_upbit_data 에서만 하고 있는 부분 고려)
 - upbit 데이터 db에 동시에 삽입 혹은 수정할 경우 충돌 가능성 체크
+
+## 어려웠던 부분
+
+- django 쿼리 최적화 ex) lazy-loading 문제
