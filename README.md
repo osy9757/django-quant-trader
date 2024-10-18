@@ -7,29 +7,28 @@
 ```
 django_backend/
 │
-├── core/                      # Core layer 관련 앱들
-│   ├── data_provider/         # DataProvider (주기적인 데이터 수집)
-│   │   ├── migrations/
-│   │   ├── tasks.py            # Celery task 정의
-│   │   ├── services.py         # 데이터 수집 로직
-│   │   ├── models.py           # 데이터 모델 정의
-│   │   └── __init__.py
-│   │
-│   ├── trader/                 # Trader
-│   │   ├── migrations/
-│   │   ├── services.py
-│   │   └── __init__.py
-│   │
-│   ├── strategy/               # Strategy (주기적으로 실행될 전략)
-│   │   ├── migrations/
-│   │   ├── tasks.py            # Celery task 정의
-│   │   ├── services.py         # 전략 실행 로직
-│   │   └── __init__.py
-│   │
-│   └── analyzer/               # Analyzer
-│       ├── migrations/
-│       ├── services.py
-│       └── __init__.py
+├── data_provider/         # DataProvider (주기적인 데이터 수집)
+│   ├── migrations/
+│   ├── tasks.py            # Celery task 정의
+│   ├── services.py         # 데이터 수집 로직
+│   ├── models.py           # 데이터 모델 정의
+│   └── __init__.py
+│
+├── trader/                 # Trader
+│   ├── migrations/
+│   ├── services.py
+│   └── __init__.py
+│
+├── strategy/               # Strategy (주기적으로 실행될 전략)
+│   ├── migrations/
+│   ├── tasks.py            # Celery task 정의
+│   ├── services.py         # 전략 실행 로직
+│   └── __init__.py
+│
+├──  analyzer/               # Analyzer
+│   ├── migrations/
+│   ├──services.py
+│   └──  __init__.py
 │
 ├── operator/                   # Operation layer (중재 역할)
 │   ├── operator.py
@@ -146,7 +145,7 @@ django_backend/
 
 1. 매수 매도 시스템 구축
 2. 매수 매도 시스템 테스트
-3. log 시스템 구축   
+3. log 시스템 구축
 4. 전략 구축
 
 - EMA, RSI, MACD 등의 지표를 사용하여 전략 구축
@@ -178,3 +177,4 @@ django_backend/
 ## 어려웠던 부분
 
 - django 쿼리 최적화 ex) lazy-loading 문제
+- upbit api상 데이터가 없는부분 존재 -> 빈시간을 제외한 분봉데이터를 return 하여 db데이터 중복 오류 (요청시간대와 return 데이터 시간대가 일치하지 않을때 null 값 저장으로 임시조치)

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_^b+i^@#@jv#gsjf&%s*%wwf#i+itn1qr7%mrd%ga&7$3lsc=^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -88,6 +88,9 @@ DATABASES = {
         'PASSWORD': 'quant',
         'HOST': 'localhost',  # 또는 데이터베이스 서버의 IP 주소
         'PORT': '5432',       # PostgreSQL의 기본 포트
+        'TEST': {
+            'NAME': 'test_quant', # test 데이터베이스 이름
+        }
     }
 }
 
@@ -146,10 +149,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 60.0,  # 1분마다 실행
         'options': {'queue': 'data_fetch'}
     },
-    'fetch-historical-upbit-data-hourly': { 
-        'task': 'data_provider.tasks.fetch_historical_upbit_data',
-        'schedule': crontab(minute=0),  # 매시간 정각에 실행
-        'args': ("UPBIT_START_DATE", 200, 1),  # start_date, max_batch_size, api_call_interval
+    'fetch-missing-upbit-data': {
+        'task': 'data_provider.tasks.fetch_missing_upbit_data',
+        #'schedule': crontab(minute=15),
+        'schedule': 60.0,  # 5분마다 실행
         'options': {'queue': 'data_fetch'}
     },
 }
@@ -185,4 +188,10 @@ LOGGING = {
     },
 }
 
-UPBIT_START_DATE = "2019-10-01T00:00:00+09:00"
+# 데이터 수집 시작 날짜
+UPBIT_START_DATE = "2024-01-01T00:00:00+09:00"
+
+# Redis 설정
+REDIS_HOST = 'localhost'  # Redis 서버의 호스트 이름 또는 IP 주소
+REDIS_PORT = 6379         # Redis 서버의 포트 번호
+REDIS_DB = 0              # 사용할 Redis 데이터베이스 번호

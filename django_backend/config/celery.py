@@ -17,10 +17,10 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
+
 @worker_ready.connect
 def at_start(sender, **kwargs):
+    print("Celery worker is ready.")
     with sender.app.connection() as conn:
-        sender.app.send_task('data_provider.tasks.fetch_historical_upbit_data', 
-                             args=[settings.UPBIT_START_DATE, 200, 0.5],
+        sender.app.send_task('data_provider.tasks.fetch_missing_upbit_data', 
                              connection=conn)
-

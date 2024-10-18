@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from data_provider.services import UpbitDataProvider
 from .abstract_trader import AbstractTrader
 import uuid
 import hashlib

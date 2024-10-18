@@ -19,4 +19,12 @@ class UpbitTraderTestCase(TestCase):
             self.assertIn("currency", account_info[0])
             self.assertIn("balance", account_info[0])
             self.assertIn("locked", account_info[0])
-        
+
+    def test_send_and_cancel_order(self):
+
+        def test_send_order(self):
+            pass
+
+        def test_cancel_order(self):
+            pass
+            
