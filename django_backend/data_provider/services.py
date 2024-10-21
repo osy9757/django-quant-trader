@@ -33,13 +33,14 @@ class UpbitDataProvider:
         """
         업비트 API에서 데이터를 가져와 저장
         """
+        # to_time이 None이면 현재 시간을 기본값으로 설정
+        if to_time is None:
+            to_time = datetime.now(self.kst).replace(second=10).strftime('%Y-%m-%dT%H:%M:%S%z')    
+            to_time = to_time[:-2] + ':' + to_time[-2:]      
+
         data = self.__get_data_from_upbit(market, to_time, count)
         saved_count = self.__save_data_to_db(data, to_time, count)
 
-        if to_time:
-            self.logger.info(f"Missing data fetched successfully at {to_time}. {saved_count} records saved\n")
-        else:
-            self.logger.info(f"Data fetched successfully. {saved_count} records saved\n")
         return saved_count, data
 
     def __get_data_from_upbit(self, market="KRW-BTC", to_time=None, count=1):
@@ -143,18 +144,29 @@ class UpbitDataProvider:
 
         # 데이터베이스에서 존재하는 시간을 가져옴
         existing_times = set(self._get_column_data_from_db())
-        existing_times = {time.replace(tzinfo=self.kst) for time in existing_times}
 
-        all_minutes = set()
+        #existing_times_str = [minute.strftime('%Y-%m-%dT%H:%M:%S') for minute in existing_times]
+        #self._save_to_json('existing_times.json', {'existing_times': list(existing_times_str)})
+
+        all_minutes = []
         current_time_iter = start_time
 
         # 모든 분 단위의 시간을 계산하여 all_minutes 집합에 추가
         while current_time_iter <= current_time:
-            all_minutes.add(current_time_iter)
+            all_minutes.append(current_time_iter.replace(tzinfo=None))
             current_time_iter += timedelta(minutes=1)
-
+        
+        all_minutes_set = set(all_minutes)
+       
         # 이미 존재하는 시간을 제외한 누락된 시간대 계산
-        missing_times = sorted(all_minutes - existing_times)
+        missing_times = sorted([time for time in all_minutes_set if time not in existing_times])
+
+        #missing_times_str = [minute.strftime('%Y-%m-%dT%H:%M:%S') for minute in missing_times]
+        #all_minutes_str = [minute.strftime('%Y-%m-%dT%H:%M:%S') for minute in all_minutes_set]
+
+        #self._save_to_json('missing_times.json', {'missing_times' : list(missing_times_str)})
+        #self._save_to_json('all_minutes.json', {'all_minutes': all_minutes_str})
+
 
         count_time = 1
         missing_time_groups = []
@@ -173,15 +185,17 @@ class UpbitDataProvider:
                 count_time += 1
             else:
                 # 연속적이지 않으면 그룹을 종료하고 새 그룹을 시작
-                current_iso = (current + timedelta(seconds=20)).strftime('%Y-%m-%dT%H:%M:%S') + "+09:00"
-                missing_time_groups.append((current_iso, count_time))
-                print(f"current_iso: {current_iso}, count_time: {count_time}")
+                previous_iso = (previous + timedelta(seconds=20)).strftime('%Y-%m-%dT%H:%M:%S') + "+09:00"
+                missing_time_groups.append((previous_iso, count_time))
+                print(f"current_iso: {previous_iso}, count_time: {count_time}")
                 count_time = 1
 
         # 마지막 남은 그룹 처리
         if count_time > 1:
             last_iso = (missing_times[-1] + timedelta(seconds=20)).strftime('%Y-%m-%dT%H:%M:%S') + "+09:00"
             missing_time_groups.append((last_iso, count_time - 1))
+
+        #self._save_to_json('missing_times.json', {'missing_times': [time.isoformat() for time in missing_times]})
 
         return missing_time_groups
 

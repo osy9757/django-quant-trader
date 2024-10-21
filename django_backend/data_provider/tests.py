@@ -5,6 +5,7 @@ import pytz
 from datetime import datetime, timedelta
 import time as t
 class UpbitDataProviderTest(TestCase):
+    
     def setUp(self):
         self.provider = UpbitDataProvider(currency="BTC")
         self.kst = pytz.timezone('Asia/Seoul')
@@ -61,7 +62,19 @@ class UpbitDataProviderTest(TestCase):
     def test_get_column_data_from_db(self):
         # 비공개 메서드 접근
         column_data = list(self.provider._get_column_data_from_db())
-        print("Column data:", column_data)
+
+        start_times = [
+                datetime.strptime("2024-10-19T05:10:00+09:00", "%Y-%m-%dT%H:%M:%S%z").replace(tzinfo=None),
+                # 이와 유사하게 여러 datetime 객체가 있다고 가정
+            ]
+        
+        start_times_set = set(start_times)
+
+        print("Formatted column data:", column_data)
+
+        filtered_column_data = [time for time in column_data if time not in start_times_set]
+
+        print("Filtered column data:", filtered_column_data)
 
     def test_get_missing_time_intervals(self):
         # 데이터가 없는 시간 구간을 가져오는 테스트

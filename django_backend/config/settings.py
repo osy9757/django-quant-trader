@@ -151,8 +151,8 @@ CELERY_BEAT_SCHEDULE = {
     },
     'fetch-missing-upbit-data': {
         'task': 'data_provider.tasks.fetch_missing_upbit_data',
-        #'schedule': crontab(minute=15),
-        'schedule': 60.0,  # 5분마다 실행
+        'schedule': crontab(minute = 0), # 자정마다 실행
+        #'schedule': 60.0,
         'options': {'queue': 'data_fetch'}
     },
 }
@@ -189,7 +189,8 @@ LOGGING = {
 }
 
 # 데이터 수집 시작 날짜
-UPBIT_START_DATE = "2024-01-01T00:00:00+09:00"
+UPBIT_START_DATE = "2021-01-01T00:00:00+09:00"
+TEST_UPBIT_START_DATE = "2024-10-20T00:00:00+09:00"
 
 # Redis 설정
 REDIS_HOST = 'localhost'  # Redis 서버의 호스트 이름 또는 IP 주소
