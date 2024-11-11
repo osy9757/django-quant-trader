@@ -7,64 +7,65 @@
 ```
 django_backend/
 │
-├── data_provider/         # DataProvider (주기적인 데이터 수집)
-│   ├── migrations/
-│   ├── tasks.py            # Celery task 정의
-│   ├── services.py         # 데이터 수집 로직
-│   ├── models.py           # 데이터 모델 정의
+├── data_provider/         # DataProvider (주기적인 데이터 수집을 담당)
+│   ├── migrations/        # 데이터베이스 마이그레이션 파일
+│   ├── tasks.py           # Celery 작업 정의 파일
+│   ├── services.py        # 데이터 수집 로직
+│   ├── models.py          # 데이터베이스 모델 정의
 │   └── __init__.py
 │
-├── trader/                 # Trader
-│   ├── migrations/
-│   ├── services.py
+├── trader/                 # Trader (매수/매도 작업 수행)
+│   ├── migrations/        # 데이터베이스 마이그레이션 파일
+│   ├── services.py        # 거래 로직 구현
 │   └── __init__.py
 │
-├── strategy/               # Strategy (주기적으로 실행될 전략)
-│   ├── migrations/
-│   ├── tasks.py            # Celery task 정의
-│   ├── services.py         # 전략 실행 로직
+├── strategy/               # Strategy (주기적으로 실행될 전략 관리)
+│   ├── migrations/        # 데이터베이스 마이그레이션 파일
+│   ├── tasks.py           # Celery 작업 정의 파일
+│   ├── services.py        # 전략 실행 로직
+│   ├── strategies/        # 다양한 전략 구현 디렉토리
 │   └── __init__.py
 │
-├──  analyzer/               # Analyzer
-│   ├── migrations/
-│   ├──services.py
-│   └──  __init__.py
+├── analyzer/               # Analyzer (데이터 분석을 수행)
+│   ├── migrations/        # 데이터베이스 마이그레이션 파일
+│   ├── services.py        # 분석 로직 구현
+│   └── __init__.py
 │
-├── operator/                   # Operation layer (중재 역할)
-│   ├── operator.py
-│   └── tasks.py                # Celery로 처리되는 중재 작업들
+├── operator/               # Operator (중재 역할을 수행)
+│   ├── operator.py        # 중재 기능 정의
+│   └── tasks.py           # Celery로 처리되는 중재 작업
 │
-├── controller/                 # Controller layer
-│   ├── kakao_controller/    # KakaoTalk Controller
+├── controller/             # Controller layer (외부 요청 처리)
+│   ├── kakao_controller/   # KakaoTalk 연동 컨트롤러
 │   │   ├── kakao_controller.py
 │   │   └── __init__.py
 │   │
-│   ├── simulator/              # Simulator
+│   ├── simulator/          # Simulator (시뮬레이션 기능)
 │   │   ├── simulator.py
 │   │   └── __init__.py
 │   │
-│   ├── controller/             # Main controller
+│   ├── controller/         # Main controller (중앙 컨트롤러)
 │   │   ├── controller.py
 │   │   └── __init__.py
 │   │
-│   └── jpt_controller/         # JptController
+│   └── jpt_controller/     # Jpt 연동 컨트롤러
 │       ├── jpt_controller.py
 │       └── __init__.py
 │
-├── config/                     # Django 설정 및 Celery 설정
-│   ├── celery.py               # Celery 설정 파일
-│   ├── settings.py             # Django 설정 파일 (Celery 관련 설정 포함)
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
+├── config/                 # Django 및 Celery 설정
+│   ├── celery.py           # Celery 설정 파일
+│   ├── settings.py         # Django 설정 파일
+│   ├── urls.py             # URL 설정
+│   ├── wsgi.py             # WSGI 설정 (서버 실행)
+│   └── asgi.py             # ASGI 설정 (비동기 서버 실행)
 │
-├── manage.py                   # Django 관리 스크립트
-├── celerybeat-schedule         # Celery beat 스케줄러 파일 (주기적 작업)
-├── requirements.txt            # 프로젝트의 패키지 종속성 리스트 (Celery 포함)
-├── environment.yml             # Conda 환경 설정 파일
-├── environment-windows.yml     # Windows 특정 환경 설정
-├── environment-macos.yml       # macOS 특정 환경 설정
-└── setup_environment.py        # 환경 설정 스크립트
+├── manage.py               # Django 관리 스크립트
+├── celerybeat-schedule     # Celery beat 스케줄러 파일 (주기적 작업)
+├── requirements.txt        # 패키지 종속성 리스트 (Celery 포함)
+├── environment.yml         # Conda 환경 설정 파일
+├── environment-windows.yml # Windows 환경 설정 파일
+├── environment-macos.yml   # macOS 환경 설정 파일
+└── setup_environment.py    # 환경 설정 스크립트
 ```
 
 ## 시작하기
@@ -120,13 +121,15 @@ django_backend/
    python manage.py runserver
    ```
 
-2. Celery 워커 시작:
+2.
+
+3. Celery 워커 시작:
 
    ```bash
    celery -A config worker --loglevel=info
    ```
 
-3. 주기적 작업을 위한 Celery beat 시작:
+4. 주기적 작업을 위한 Celery beat 시작:
    ```bash
    celery -A config beat --loglevel=info
    ```
@@ -168,6 +171,11 @@ django_backend/
 - db sqlite 3 -> postgresql 변경
 
   이유 : 분봉데이터가 너무 커서 조회에 어려움이 있어서 파티셔닝을 적용해 저장하기 위해서
+
+- db 데이터 처리 방식
+
+datetime 데이터 형식에서 처리
+이유 : 기존에 에러 처리시 로그 기록을 편하게 하기 위해서 kst 데이터 타입으로 변경 후 처리 했으나 특정 시간대에 문제가 많이 발생하여 수정
 
 ## 추후 생각해봐야할 문제
 

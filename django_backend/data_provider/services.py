@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 import json
 import os
+import redis
 
 
 class UpbitDataProvider:
@@ -28,6 +29,13 @@ class UpbitDataProvider:
         self.query_string = {"market": self.AVAILABLE_CURRENCY[currency], "count": 1}
         self.kst = pytz.timezone('Asia/Seoul')
         self.logger = logging.getLogger(__name__)
+
+        self.redis_client = redis.StrictRedis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=0,
+            decode_responses=True
+        )
 
     def get_info(self, market="KRW-BTC", to_time=None, count=1):
         """
@@ -213,3 +221,55 @@ class UpbitDataProvider:
 
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
+
+    def _save_to_redis(self, data):
+        """
+        data를 redis에 저장하는 함수
+        """
+        for candle in data:
+            key = f"upbit:{self.query_string['market']}:1m"
+            score = int(datetime.strptime(candle["candle_date_time_kst"], "%Y-%m-%dT%H:%M:%S").timestamp())
+            value = json.dumps({
+                "date_time": candle["candle_date_time_kst"],
+                "opening_price": candle["opening_price"],
+                "high_price": candle["high_price"],
+                "low_price": candle["low_price"],
+                "closing_price": candle["trade_price"],
+                "acc_price": candle["candle_acc_trade_price"],
+                "acc_volume": candle["candle_acc_trade_volume"],
+            }, sort_keys=True)
+            self.redis_client.zadd(key, {value: score})
+
+
+    def _sync_data_to_redis(self, from_date=None):
+        """
+        데이터베이스의 데이터를 Redis에 동기화하는 함수
+        from_time부터의 시간을 동기화
+        """
+        try:
+            if from_date is None:
+                all_data = UpbitData.objects.all()
+            else:
+                all_data = UpbitData.objects.filter(date_time__gte=from_date)
+
+            for data in all_data:
+                key = f"upbit:{data.market}:1m"
+                # date_time을 timestamp로 변환하여 점수로 사용
+                score = int(data.date_time.timestamp())
+                value = json.dumps({
+                    "date_time": data.date_time.strftime('%Y-%m-%dT%H:%M:%S'),
+                    "opening_price": data.opening_price,
+                    "high_price": data.high_price,
+                    "low_price": data.low_price,
+                    "closing_price": data.closing_price,
+                    "acc_price": data.acc_price,
+                    "acc_volume": data.acc_volume,
+                })
+                # Redis의 Sorted Set에 데이터 추가
+                self.redis_client.zadd(key, {value: score})
+            self.logger.info("Data successfully synced to Redis.")
+        except Exception as e:
+            self.logger.error(f'Error suncing data to Redis; {e}')
+
+    def _add_data_to_redis(self, data):
+        pass

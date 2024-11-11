@@ -1,9 +1,13 @@
 from django.test import TestCase
 from .services import UpbitDataProvider
+from unittest.mock import patch, MagicMock
 from data_provider.models import UpbitData  
 import pytz
 from datetime import datetime, timedelta
 import time as t
+import json
+import redis
+
 class UpbitDataProviderTest(TestCase):
     
     def setUp(self):
@@ -93,3 +97,51 @@ class UpbitDataProviderTest(TestCase):
             self.assertGreater(saved_count, 0, f"No data was saved for {missing_time} with count {count}")
 
 
+class UpbitDataProviderRedisTest(TestCase):
+
+    def setUp(self):
+        self.provider = UpbitDataProvider(currency="BTC")
+        self.kst = pytz.timezone('Asia/Seoul')
+        self.start_time = datetime.strptime("2024-10-19T05:10:00+09:00", "%Y-%m-%dT%H:%M:%S%z")
+
+        # 테스트 데이터 생성
+        for i in range(5):
+            UpbitData.objects.create(
+                market=self.provider.query_string["market"],
+                date_time=self.start_time + timedelta(minutes=i),
+                opening_price=10000 + i,
+                high_price=10000 + i,
+                low_price=10000 + i,
+                closing_price=10000 + i,
+                acc_price=1000 + i,
+                acc_volume=10 + i
+            )
+
+        # 실제 Redis 클라이언트 설정
+        self.redis_client = redis.StrictRedis(
+            host='localhost',  # 실제 Redis 서버의 호스트
+            port=6379,         # 실제 Redis 서버의 포트
+            db=0,              # 사용할 Redis 데이터베이스 번호
+            decode_responses=True
+        )
+
+    def test_sync_data_to_redis(self):
+        # 메서드 호출
+        self.provider._sync_data_to_redis()
+
+        # Redis에 데이터가 올바르게 저장되었는지 확인
+        for data in UpbitData.objects.all():
+            key = f"upbit:{data.market}:1m:test"
+            score = int(data.date_time.timestamp())
+            value = json.dumps({
+                "date_time": data.date_time.strftime('%Y-%m-%dT%H:%M:%S'),
+                "opening_price": data.opening_price,
+                "high_price": data.high_price,
+                "low_price": data.low_price,
+                "closing_price": data.closing_price,
+                "acc_price": data.acc_price,
+                "acc_volume": data.acc_volume,
+            }, sort_keys=True)
+
+            # Redis의 Sorted Set에 데이터 추가
+        self.redis_client.zadd(key, {value: score})

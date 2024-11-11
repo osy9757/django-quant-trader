@@ -31,7 +31,14 @@ def fetch_upbit_data(self):
     if not redis_client.exists(LOCK_KEY):  # 락이 걸려있지 않은 경우에만 실행
         provider = UpbitDataProvider(currency="BTC")
         try:
+            # upbit에서 데이터 가져오기 및 db저장
             saved_count, data = provider.get_info()
+
+            # Redis에 데이터 저장
+            provider._save_to_redis(data)
+
+            logger.info(f"Data가 db와 Redis에 저장되었습니다.")
+
         except requests.exceptions.RequestException as e:
             logger.error(f"네트워크 오류로 인해 Celery 태스크에서 데이터를 가져오지 못했습니다: {e}\n")
             raise self.retry(exc=e, countdown=10)  # 10초 후 재시도
