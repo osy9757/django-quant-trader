@@ -241,21 +241,31 @@ class UpbitDataProvider:
             self.redis_client.zadd(key, {value: score})
 
 
-    def _sync_data_to_redis(self, from_date=None):
+    def _sync_data_to_redis(self, save_days = settings.REDIS_SAVE_DAYS):
         """
         데이터베이스의 데이터를 Redis에 동기화하는 함수
         from_time부터의 시간을 동기화
         """
         try:
-            if from_date is None:
-                all_data = UpbitData.objects.all()
-            else:
-                all_data = UpbitData.objects.filter(date_time__gte=from_date)
+            now = datetime.now()
+            save_days_ago = now - timedelta(days=save_days)
+            data_gaps = []
 
-            for data in all_data:
-                key = f"upbit:{data.market}:1m"
-                # date_time을 timestamp로 변환하여 점수로 사용
-                score = int(data.date_time.timestamp())
+            db_data = UpbitData.objects.filter(date_time__gte=save_days_ago).values_list('date_time', flat=True)
+
+            redis_key = f"upbit:{self.query_string['market']}:1m"
+            redis_timestamps = self.redis_client.zrangebyscore(redis_key, int(save_days_ago.timestamp()), int(now.timestamp()), withscores=True)
+            redis_timestamps = {int(score) for _, score in redis_timestamps}
+
+            # 누락된 시간대 식별
+            for dt in db_data:
+                timestamp = int(dt.timestamp())
+                if timestamp not in redis_timestamps:
+                    data_gaps.append(dt)
+
+            # 누락된 데이터 Redis에 추가
+            for dt in data_gaps:
+                data = UpbitData.objects.get(date_time=dt)
                 value = json.dumps({
                     "date_time": data.date_time.strftime('%Y-%m-%dT%H:%M:%S'),
                     "opening_price": data.opening_price,
@@ -264,12 +274,10 @@ class UpbitDataProvider:
                     "closing_price": data.closing_price,
                     "acc_price": data.acc_price,
                     "acc_volume": data.acc_volume,
-                })
+                }, sort_keys=True)
+                score = int(data.date_time.timestamp())
                 # Redis의 Sorted Set에 데이터 추가
-                self.redis_client.zadd(key, {value: score})
+                self.redis_client.zadd(redis_key, {value: score})
             self.logger.info("Data successfully synced to Redis.")
         except Exception as e:
             self.logger.error(f'Error suncing data to Redis; {e}')
-
-    def _add_data_to_redis(self, data):
-        pass

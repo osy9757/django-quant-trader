@@ -192,6 +192,9 @@ LOGGING = {
 UPBIT_START_DATE = "2021-01-01T00:00:00+09:00"
 TEST_UPBIT_START_DATE = "2024-10-20T00:00:00+09:00"
 
+#redis 데이터 저장 기간
+REDIS_SAVE_DAYS = 365
+
 # Redis 설정
 REDIS_HOST = 'localhost'  # Redis 서버의 호스트 이름 또는 IP 주소
 REDIS_PORT = 6379         # Redis 서버의 포트 번호
