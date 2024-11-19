@@ -13,7 +13,10 @@ load_dotenv()
 
 class UpbitTrader(AbstractTrader):
     """
-     업비트 거래소의 거래 요청을 처리하는 클래스
+    업비트 거래소의 거래 요청을 처리하는 클래스
+    
+    NOTE: 현재 이 클래스는 Upbit만 지원합니다.
+    TODO: 향후 다른 거래소(Binance, Coinbase 등)를 지원할 수 있도록 확장 가능한 구조로 수정 필요.
     """
 
     RESULT_CHECK_INTERVAL = 10
@@ -31,11 +34,19 @@ class UpbitTrader(AbstractTrader):
         self.secret_key = os.environ.get("UPBIT_OPEN_API_SECRET_KEY")
         self.server_url = "https://api.upbit.com/v1/"
 
+        # FIXME: 환경 변수 로드 실패 시 기본값 설정이나 오류 처리 로직 필요.
+        # TODO: 여러 거래소를 지원할 수 있도록 서버 URL이나 인증 키를 동적으로 설정하는 로직 추가 필요.
+
+
 
 
     def get_account_info(self):
         """
          내가 보유한 자산 리스트를 보여준다
+        
+        TODO: 반환 데이터를 표준화하여 다른 거래소의 응답과 일관되게 맞출 필요가 있음.
+        FIXME: API 호출 실패 시 재시도 로직 추가 필요.
+
          Return : {
            "currency": 화폐 단위
            "balance": 주문 가능 금액/수량
@@ -55,6 +66,9 @@ class UpbitTrader(AbstractTrader):
     def send_request(self, market, side, price = None, volume = None, ord_type = 'best', time_in_force = 'ioc'):
         """
             Upbit에 거래 주문 전송
+        
+        TODO: 거래소별 주문 파라미터 표준화 필요. 확장성을 위해 파라미터 검증 로직 추가.
+        FIXME: 파라미터 유효성 검사가 누락됨. 파라미터가 올바른지 확인하는 로직 추가 필요.
 
             request:
                 - market (필수): 마켓 ID (예: 'KRW-BTC')
@@ -114,6 +128,8 @@ class UpbitTrader(AbstractTrader):
     def cancel_request(self, request_id):
         """
             주문 UUID를 통해 해당 주문에 대한 취소 접수
+        
+        TODO: 여러 거래소 지원 시 공통 인터페이스 필요. 주문 취소 시 상태 확인 로직 추가.
         """
         
         params = {
@@ -129,18 +145,40 @@ class UpbitTrader(AbstractTrader):
         return requests.delete(self.server_url + "orders", parmas=params, headers=headers).json()
 
     def cancel_all_requests(self):
+        """
+        TODO: 현재 미구현 상태. 모든 미체결 주문을 취소하는 기능 추가 필요.
+        NOTE: 여러 주문을 일괄 취소하는 로직이 필요할 수 있음.
+        """
         pass
 
     def get_order_info(self, order_id):
+        """
+        TODO: 특정 주문 정보를 조회하는 기능 구현 필요.
+        NOTE: 주문 조회 시 응답 데이터의 표준화 필요.
+        """
         pass
 
     def get_open_orders(self):
+        """
+        TODO: 현재 미구현 상태. 열려 있는 모든 주문을 조회하는 기능 추가 필요.
+        """
         pass
 
     def get_closed_orders(self):
+        """
+        TODO: 현재 미구현 상태. 완료된 모든 주문을 조회하는 기능 추가 필요.
+        """
         pass
 
+
     def _create_jwt_token(self, query_string = None):
+        """
+        JWT 토큰을 생성하는 내부 함수
+        
+        NOTE: 보안 강화를 위해 토큰 만료 시간 추가 검토 필요.
+        TODO: 여러 거래소에서 사용 가능한 토큰 생성 방식을 인터페이스화 필요.
+        """
+
         payload = {
             "access_key": self.access_key,
             "nonce": str(uuid.uuid4()),
@@ -163,6 +201,9 @@ class UpbitTrader(AbstractTrader):
         :param headers: 요청에 사용할 헤더
         :param params: 요청에 사용할 파라미터
         :return: JSON 응답 데이터 또는 None
+        
+        NOTE: 에러 처리 로직이 간단하게 구성되어 있음. 응답 코드에 따른 추가 처리 로직 필요.
+        TODO: 여러 거래소 지원 시 재사용성을 높이기 위해 인터페이스화 필요.
         """
         try:
             response = requests.get(url, headers=headers, params=params)
