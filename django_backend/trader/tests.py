@@ -1,3 +1,4 @@
+# django_backend/trader/tests.py
 from django.test import TestCase
 from trader.services import UpbitTrader
 

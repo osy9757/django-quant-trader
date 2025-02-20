@@ -1,3 +1,4 @@
+
 name: django-quant-trader
 channels:
   - conda-forge
@@ -21,4 +22,4 @@ dependencies:
     - brotli
     - sqlparse
     - typing-extensions
-    - redis  # 이 줄을 추가합니다
+    - redis  

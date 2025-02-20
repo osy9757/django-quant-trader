@@ -1,3 +1,4 @@
+# django_backend/strategy/strategy.py
 from abc import ABC, abstractmethod
 
 class Strategy(ABC):

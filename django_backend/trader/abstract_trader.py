@@ -1,3 +1,4 @@
+# django_backend/trader/abstract_trader.py
 from abc import ABC, abstractmethod
 
 class AbstractTrader(ABC):

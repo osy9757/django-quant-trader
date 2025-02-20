@@ -1,3 +1,4 @@
+# django_backend/data_provider/tasks.py
 from celery import shared_task
 from data_provider.services import UpbitDataProvider 
 import logging

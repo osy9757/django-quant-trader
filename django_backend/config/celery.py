@@ -1,3 +1,4 @@
+# django_backend/config/celery.py
 import os
 from celery import Celery
 from celery.signals import worker_ready

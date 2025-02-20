@@ -1,1 +1,1 @@
- 
+# django_backend/config/__init__.py

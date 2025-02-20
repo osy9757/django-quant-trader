@@ -1,3 +1,4 @@
+  # django_backend/data_provider/models.py
 from django.db import models
 
 class UpbitData(models.Model):

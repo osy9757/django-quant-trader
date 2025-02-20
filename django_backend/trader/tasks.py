@@ -1,3 +1,4 @@
+# django_backend/trader/tasks.py
 from celery import shared_task
 from .services import UpbitTrader
 
