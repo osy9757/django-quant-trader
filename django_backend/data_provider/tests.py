@@ -1,8 +1,8 @@
 # django_backend/data_provider/tests.py
 from django.test import TestCase
-from .services import UpbitDataProvider
+from django_backend.data_provider.services import UpbitDataProvider
 from unittest.mock import patch, MagicMock
-from data_provider.models import UpbitData  
+from django_backend.data_provider.models import UpbitData
 import pytz
 from datetime import datetime, timedelta
 import time as t

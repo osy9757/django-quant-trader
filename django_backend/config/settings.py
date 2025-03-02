@@ -11,23 +11,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from celery.schedules import crontab
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+ENV_PATH = BASE_DIR.parent / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-_^b+i^@#@jv#gsjf&%s*%wwf#i+itn1qr7%mrd%ga&7$3lsc=^"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = []
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+DEBUG = (os.environ["DJANGO_DEBUG"] == "True")
+ALLOWED_HOSTS = os.environ["DJANGO_ALLOWED_HOSTS"].split(",")
 
 
 # Application definition
@@ -41,10 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # 추가 기능
-    'data_provider',
-    'trader',
-    'strategy',
-    'analyzer',
+    'django_backend.data_provider',
+    'django_backend.trader',
+    'django_backend.strategy',
+    'django_backend.analyzer',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +61,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "django_backend.config.urls"
 
 TEMPLATES = [
     {
@@ -75,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+WSGI_APPLICATION = "django_backend.config.wsgi.application"
 
 
 # Database
@@ -84,14 +88,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'quant',
-        'USER': 'osy',
-        'PASSWORD': 'quant',
-        'HOST': 'localhost',  # 또는 데이터베이스 서버의 IP 주소
-        'PORT': '5432',       # PostgreSQL의 기본 포트
-        'TEST': {
-            'NAME': 'test_quant', # test 데이터베이스 이름
-        }
+        'NAME': os.environ["POSTGRES_DB"],
+        'USER': os.environ["POSTGRES_USER"],
+        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
+        'HOST': os.environ["POSTGRES_HOST"],
+        'PORT': os.environ["POSTGRES_PORT"],
     }
 }
 
@@ -137,8 +138,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.environ["CELERY_BROKER_URL"]
+CELERY_RESULT_BACKEND = os.environ["CELERY_RESULT_BACKEND"]
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -146,12 +148,12 @@ CELERY_TIMEZONE = 'Asia/Seoul'
 
 CELERY_BEAT_SCHEDULE = {
     'fetch-upbit-data-every-minute': {
-        'task': 'data_provider.tasks.fetch_upbit_data',
+        'task': 'django_backend.data_provider.tasks.fetch_upbit_data',
         'schedule': 60.0,  # 1분마다 실행
         'options': {'queue': 'data_fetch'}
     },
     'fetch-missing-upbit-data': {
-        'task': 'data_provider.tasks.fetch_missing_upbit_data',
+        'task': 'django_backend.data_provider.tasks.fetch_missing_upbit_data',
         'schedule': crontab(minute = 0), # 자정마다 실행
         #'schedule': 60.0,
         'options': {'queue': 'data_fetch'}
@@ -197,6 +199,6 @@ TEST_UPBIT_START_DATE = "2024-10-20T00:00:00+09:00"
 REDIS_SAVE_DAYS = 365
 
 # Redis 설정
-REDIS_HOST = 'localhost'  # Redis 서버의 호스트 이름 또는 IP 주소
-REDIS_PORT = 6379         # Redis 서버의 포트 번호
-REDIS_DB = 0              # 사용할 Redis 데이터베이스 번호
+REDIS_HOST = os.environ["REDIS_HOST"]
+REDIS_PORT = int(os.environ["REDIS_PORT"])
+REDIS_DB = int(os.environ["REDIS_DB"])

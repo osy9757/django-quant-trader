@@ -1,6 +1,6 @@
   # django_backend/data_provider/services.py
 import requests
-from data_provider.models import UpbitData  
+from django_backend.data_provider.models import UpbitData  
 import time as t
 import pytz
 import logging
@@ -10,7 +10,7 @@ from django.conf import settings
 import json
 import os
 import redis
-from config.utils import generate_redis_key
+from django_backend.config.utils import generate_redis_key
 
 
 class UpbitDataProvider:

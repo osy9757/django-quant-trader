@@ -5,7 +5,7 @@ from celery.signals import worker_ready
 from django.conf import settings
 
 # Django 설정 모듈을 Celery의 기본으로 사용
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_backend.config.settings')
 
 app = Celery('django_backend')
 

@@ -1,7 +1,7 @@
 # django_backend/trader/services.py
 import os
 from dotenv import load_dotenv
-from .abstract_trader import AbstractTrader
+from django_backend.trader.abstract_trader import AbstractTrader
 import uuid
 import hashlib
 import jwt
@@ -143,7 +143,7 @@ class UpbitTrader(AbstractTrader):
         authorization = 'Bearer {}'.format(jwt_token)
         headers = {"Authorization": authorization}
 
-        return requests.delete(self.server_url + "orders", parmas=params, headers=headers).json()
+        return requests.delete(self.server_url + "orders", params=params, headers=headers).json()
 
     def cancel_all_requests(self):
         """

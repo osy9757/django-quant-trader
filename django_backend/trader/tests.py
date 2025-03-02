@@ -1,6 +1,6 @@
 # django_backend/trader/tests.py
 from django.test import TestCase
-from trader.services import UpbitTrader
+from django_backend.trader.services import UpbitTrader
 
 
 class UpbitTraderTestCase(TestCase):

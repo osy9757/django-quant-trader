@@ -1,6 +1,6 @@
 # django_backend/trader/tasks.py
 from celery import shared_task
-from .services import UpbitTrader
+from django_backend.trader.services import UpbitTrader
 
 @shared_task
 def get_account_info_task():
