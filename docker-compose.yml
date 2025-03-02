@@ -1,0 +1,102 @@
+# docker-compose.yml
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: quant_db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - quant-network
+
+  redis:
+    image: redis:7.0
+    container_name: quant_redis
+    ports:
+      - "6380:6379"
+    networks:
+      - quant-network
+
+  web:
+    build: .
+    container_name: quant_web    
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=django_backend.config.settings
+    command: conda run -n django-quant-trader python django_backend/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - .env:/app/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - quant-network
+
+  celery:
+    build: .
+    container_name: quant_celery
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=django_backend.config.settings
+    command: conda run -n django-quant-trader celery -A django_backend.config worker -l debug --concurrency=4 -Q data_fetch,default
+    volumes:
+      - .env:/app/.env
+    depends_on:
+      - web
+      - redis
+      - db
+    networks:
+      - quant-network
+
+  celery_beat:
+    build: .
+    container_name: quant_celery_beat
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=django_backend.config.settings
+    command: conda run -n django-quant-trader celery -A django_backend.config beat -l debug
+    volumes:
+      - .env:/app/.env
+    depends_on:
+      - web
+      - redis
+      - db
+    networks:
+      - quant-network
+      
+  flower:
+    build: .
+    container_name: quant_flower
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - DJANGO_SETTINGS_MODULE=django_backend.config.settings
+    command: conda run -n django-quant-trader celery -A django_backend.config flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - web
+      - celery
+    networks:
+      - quant-network
+
+
+networks:
+  quant-network:
+
+volumes:
+  postgres_data:
+    external: true
+ 

@@ -1,4 +1,4 @@
-
+#environment.yml
 name: django-quant-trader
 channels:
   - conda-forge
@@ -6,6 +6,7 @@ channels:
 dependencies:
   - python=3.11
   - django=4.1
+  - psycopg2 
   - pip
   - pip:
     - celery==5.2.7
@@ -23,3 +24,6 @@ dependencies:
     - sqlparse
     - typing-extensions
     - redis  
+    - python-dotenv
+    - pyjwt
+    - flower
